@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Anasa</string>
+    <string name="a11y_summary">Shows a short breathing pause before apps you choose.</string>
+    <string name="a11y_description">Anasa uses this service only to notice which app comes to the foreground, so it can show a breathing pause before the apps you picked. It does not read screen content, typed text or notifications, and nothing ever leaves your phone — Anasa has no internet access.</string>
+</resources>
