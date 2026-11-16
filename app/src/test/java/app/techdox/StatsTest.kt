@@ -25,18 +25,42 @@ class StatsTest {
 }
 
 class ReflectionsTest {
-    @Test fun neverRepeatsTwiceInARow() {
-        var prev = -1
-        repeat(500) {
-            val i = app.techdox.data.Reflections.pickIndex()
-            assert(i != prev)
-            prev = i
+    private val r = app.techdox.data.Reflections
+    private val mine = listOf("Read more", "Sleep earlier")
+
+    @Test fun builtInWhenNoReasons() {
+        repeat(50) { assert(!r.choose(emptyList(), mixBuiltIn = true).own) }
+    }
+
+    @Test fun onlyOwnWhenMixIsOff() {
+        repeat(200) {
+            val c = r.choose(mine, mixBuiltIn = false)
+            assert(c.own && c.text in mine)
         }
     }
 
-    @Test fun appNameIsFilledIn() {
-        app.techdox.data.Reflections.all.indices.forEach {
-            assert("%s" !in app.techdox.data.Reflections.text(it, "Instagram"))
+    @Test fun mixShowsBoth() {
+        val cards = List(300) { r.choose(mine, mixBuiltIn = true) }
+        assert(cards.any { it.own } && cards.any { !it.own })
+    }
+
+    @Test fun neverRepeatsTwiceInARow() {
+        var prev: String? = null
+        repeat(500) {
+            val c = r.choose(mine, mixBuiltIn = true)
+            assert(c.text != prev)
+            prev = c.text
         }
+    }
+
+    @Test fun ownWordsAreShownAsWritten() {
+        val own = app.techdox.data.Reflections.Card("100%s mine", own = true)
+        assertEquals("100%s mine", r.display(own, "Instagram"))
+        r.all.forEach { assert("%s" !in r.display(app.techdox.data.Reflections.Card(it, false), "Instagram")) }
+    }
+
+    @Test fun sanitizeCleansInput() {
+        assertEquals(listOf("a b", "c"), r.sanitize(listOf(" a\nb ", "", "c", "c")))
+        assertEquals(r.MAX_REASONS, r.sanitize(List(9) { "r$it" }).size)
     }
 }

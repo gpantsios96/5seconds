@@ -65,8 +65,12 @@ blocked, an overlay fallback can be added later as an opt-in.
    The count includes this attempt.
 2. **Reflection card:** a large card with one short line that asks the user to think,
    e.g. "What were you hoping to find in Instagram?".
-   - Lines are original to this project (`data/Reflections.kt`), picked at random and
-     never the same twice in a row. Some include the app's name.
+   - **Your own reasons:** the user writes up to 5 short reasons for cutting back (in
+     onboarding, editable in Settings). When they exist, the card shows one of them under
+     "You wrote". With "Mix in built-in lines" on (default), a built-in line appears about
+     one time in three.
+   - Built-in lines are original to this project (`data/Reflections.kt`). Some include the
+     app's name. The same text is never shown twice in a row.
    - Pause length (per app, see §4): **Short** = 5 s (default), **Medium** = 10 s,
      **Long** = 15 s. A progress bar on the card shows the wait.
    - Optional haptics: one soft tick when the wait ends.
@@ -121,6 +125,7 @@ Days use the device's local time zone and start at midnight.
 - Grace period: 30 s / 1 / 3 / 5 / 10 min (default 3 min).
 - Haptics: on or off (default on).
 - Intention prompt: on or off (default off).
+- Your reasons (up to 5) and "Mix in built-in lines" (default on).
 
 **Per-app** (tap a guarded app):
 - Pause length: "Use default" or a specific length.
@@ -142,7 +147,9 @@ null = use default); global settings are in DataStore.
 1. **Welcome:** what Techdox does, in one sentence and one animation.
 2. **Pick apps:** suggestions are pre-ticked if installed (Instagram, TikTok, YouTube,
    X, Facebook, Reddit, Snapchat).
-3. **Phone setup:** what the app can and can't see, then a checklist. Each step has a
+3. **Your reasons:** "Why are you doing this?" Free-text fields plus tappable starting
+   points. Optional.
+4. **Phone setup:** what the app can and can't see, then a checklist. Each step has a
    button that opens the right system page, and a tick when the app can detect it's done.
    - Turn on the accessibility service (opens Accessibility settings, highlighting our entry
      where the phone supports it). Detected.

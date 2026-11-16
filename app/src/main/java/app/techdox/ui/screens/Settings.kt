@@ -38,6 +38,7 @@ import app.techdox.data.PauseLength
 import app.techdox.data.GRACE_OPTIONS
 import app.techdox.data.graceLabel
 import app.techdox.data.Settings
+import app.techdox.ui.ReasonsEditor
 import app.techdox.ui.SetupChecklist
 import app.techdox.ui.rememberAccessibilityEnabled
 import kotlinx.coroutines.launch
@@ -78,6 +79,10 @@ fun SettingsScreen(settings: Settings) {
                     )
                 }
             }
+        }
+        Section("Your reasons", "The pause card shows these, in your own words.") {
+            ReasonsEditor(settings.reasons)
+            ToggleRow("Mix in $APP_NAME's own lines", settings.mixBuiltIn) { scope.launch { c.settings.setMixBuiltIn(it) } }
         }
         Section("Pause screen") {
             ToggleRow("Vibrate when the pause ends", settings.haptics) { scope.launch { c.settings.setHaptics(it) } }

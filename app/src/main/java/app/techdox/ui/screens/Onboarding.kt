@@ -50,7 +50,10 @@ import androidx.compose.ui.unit.dp
 import app.techdox.container
 import app.techdox.data.AppConfig
 import app.techdox.pause.PulseShape
+import app.techdox.ui.ReasonsEditor
 import app.techdox.ui.SetupChecklist
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.flow.first
 import app.techdox.ui.rememberAccessibilityEnabled
 import kotlinx.coroutines.launch
 
@@ -89,8 +92,9 @@ fun OnboardingScreen() {
                     AppPickerList(Modifier.weight(1f))
                     NavRow(onBack = { page = 0 }, onNext = { page = 2 })
                 }
+                2 -> ReasonsPage(onBack = { page = 1 }, onNext = { page = 3 })
                 else -> SetupPage(
-                    onBack = { page = 1 },
+                    onBack = { page = 2 },
                     onFinish = { scope.launch { c.settings.setOnboardingDone(true) } },
                 )
             }
@@ -154,6 +158,24 @@ private fun WelcomePage(onNext: () -> Unit) {
         Button(onClick = onNext, shape = RoundedCornerShape(32.dp), modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
             Text("Get started", style = MaterialTheme.typography.titleMedium)
         }
+    }
+}
+
+@Composable
+private fun ReasonsPage(onBack: () -> Unit, onNext: () -> Unit) {
+    val settings = LocalContext.current.container.settings
+    // Load once; the editor saves every change itself.
+    val saved by produceState<List<String>?>(null) { value = settings.settings.first().reasons }
+    Column(Modifier.fillMaxSize()) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+            Header(
+                "Why are you doing this?",
+                "Write it in your own words. $APP_NAME will show you these lines when you reach for a guarded app. You can change them any time.",
+            )
+            saved?.let { ReasonsEditor(it, Modifier.padding(horizontal = 16.dp)) }
+            Spacer(Modifier.height(16.dp))
+        }
+        NavRow(onBack = onBack, onNext = onNext)
     }
 }
 

@@ -46,16 +46,37 @@ object Reflections {
         "Small pauses add up to a different week.",
     )
 
-    private var last = -1
+    /** What the pause card shows: one of the user's own reasons, or a built-in line. */
+    data class Card(val text: String, val own: Boolean)
 
-    /** A random index into [all], never the same one twice in a row. */
-    fun pickIndex(random: Random = Random.Default): Int {
-        var i = random.nextInt(all.size)
-        if (i == last) i = (i + 1) % all.size
-        last = i
-        return i
+    const val MAX_REASONS = 5
+    const val MAX_REASON_LENGTH = 120
+
+    private var lastText: String? = null
+
+    /**
+     * Picks the card for one pause.
+     * - No reasons written: a built-in line.
+     * - Reasons written: one of them; with [mixBuiltIn], a built-in line about one time in three.
+     * The same text is never shown twice in a row when there is another one to show.
+     */
+    fun choose(reasons: List<String>, mixBuiltIn: Boolean, random: Random = Random.Default): Card {
+        val useOwn = reasons.isNotEmpty() && (!mixBuiltIn || random.nextInt(3) != 0)
+        val pool = if (useOwn) reasons else all
+        val candidates = pool.filter { it != lastText }.ifEmpty { pool }
+        val text = candidates[random.nextInt(candidates.size)]
+        lastText = text
+        return Card(text, own = useOwn)
     }
 
-    fun text(index: Int, appLabel: String): String =
-        all[index.mod(all.size)].replace("%s", appLabel)
+    /** Built-in lines may contain `%s` for the app's name; the user's own words are shown as written. */
+    fun display(card: Card, appLabel: String): String =
+        if (card.own) card.text else card.text.replace("%s", appLabel)
+
+    /** Cleans up what the user typed: one line each, trimmed, no blanks or duplicates, capped. */
+    fun sanitize(reasons: List<String>): List<String> =
+        reasons.map { it.replace('\n', ' ').trim().take(MAX_REASON_LENGTH) }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .take(MAX_REASONS)
 }

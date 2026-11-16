@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import app.techdox.data.AppConfigDao
 import app.techdox.data.PauseLength
+import app.techdox.data.Reflections
 import app.techdox.data.Event
 import app.techdox.data.EventDao
 import app.techdox.data.EventType
@@ -29,6 +30,8 @@ data class PauseSession(
     val graceSeconds: Int,
     val haptics: Boolean,
     val intentionPrompt: Boolean,
+    /** The line shown on the card, chosen once when the pause starts. */
+    val card: Reflections.Card,
 )
 
 /**
@@ -103,6 +106,7 @@ class PauseCoordinator(
                     graceSeconds = c?.graceSeconds ?: s.graceSeconds,
                     haptics = s.haptics,
                     intentionPrompt = s.intentionPrompt,
+                    card = Reflections.choose(s.reasons, s.mixBuiltIn),
                 )
                 launchPause(context)
             }

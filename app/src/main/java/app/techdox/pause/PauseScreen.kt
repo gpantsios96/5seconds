@@ -60,7 +60,7 @@ import app.techdox.service.PauseSession
 import java.time.LocalDate
 
 /**
- * The pause: a card with a short reflection. The choice buttons appear once the card has been on
+ * The pause: a card with one of the user's own reasons, or a short built-in reflection. The choice buttons appear once the card has been on
  * screen for the session's pause length.
  */
 @Composable
@@ -78,8 +78,7 @@ fun PauseScreen(
         events.attemptsSince(session.packageName, Stats.startOfDay(LocalDate.now()))
     }.collectAsState(initial = null)
 
-    // Saved so a rotation keeps the same line and doesn't restart the wait.
-    val reflectionIndex = rememberSaveable { Reflections.pickIndex() }
+    // Saved so a rotation doesn't restart the wait.
     var ready by rememberSaveable { mutableStateOf(false) }
     var intention by rememberSaveable { mutableStateOf("") }
 
@@ -146,8 +145,16 @@ fun PauseScreen(
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.height(48.dp),
                         )
+                        if (session.card.own) {
+                            Text(
+                                "You wrote",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                        }
                         Text(
-                            Reflections.text(reflectionIndex, label),
+                            Reflections.display(session.card, label),
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
