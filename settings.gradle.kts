@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Anasa"
+rootProject.name = "Techdox"
 include(":app")

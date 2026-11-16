@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "app.anasa"
+    namespace = "app.techdox"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "app.anasa"
+        applicationId = "app.techdox"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

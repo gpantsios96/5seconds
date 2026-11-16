@@ -1,7 +1,7 @@
-# Anasa — Feature Spec (v1)
+# Techdox — Feature Spec (v1)
 
-Anasa puts a short, deliberate pause between you and the apps you open on autopilot.
-When you launch a guarded app, Anasa shows a breathing screen first. After the breath
+Techdox puts a short, deliberate pause between you and the apps you open on autopilot.
+When you launch a guarded app, Techdox shows a short reflection card first. After the pause
 you either open the app or walk away. That's the whole idea.
 
 All code, text and assets are original to this project.
@@ -25,10 +25,10 @@ All code, text and assets are original to this project.
 - The user picks apps from a searchable list of installed, launchable apps (icon + label).
 - Package visibility uses a `<queries>` block for `MAIN`/`LAUNCHER` intents, not
   `QUERY_ALL_PACKAGES`.
-- Anasa, the launcher (home screen), System UI and Settings can never be guarded, so the
+- Techdox, the launcher (home screen), System UI and Settings can never be guarded, so the
   user can't lock themselves out.
 
-### 2.2 Detection: `AnasaAccessibilityService`
+### 2.2 Detection: `TechdoxAccessibilityService`
 - Listens to `TYPE_WINDOW_STATE_CHANGED` only. No window content, no view IDs, no text.
   `canRetrieveWindowContent="false"`.
 - The guarded list changes at runtime, so there is no static `packageNames` filter. The
@@ -57,21 +57,21 @@ The service starts `PauseActivity` (Compose, full-screen):
 | Covers app instantly | ~1 frame of the target app may flash first | Can be drawn over the app slightly faster |
 | OEM quirks | Some aggressive OEMs (MIUI etc.) may block background starts. Mitigated by the accessibility exemption and a "pop-up in background" tip in onboarding. | Generally more robust on those OEMs |
 
-Anasa v1 uses only the Activity. If testing shows a device where background starts get
+Techdox v1 uses only the Activity. If testing shows a device where background starts get
 blocked, an overlay fallback can be added later as an opt-in.
 
 ### 2.4 Pause screen flow
 1. **Header:** the app's icon and name, plus "You've opened Instagram 7 times today".
    The count includes this attempt.
-2. **Breathing:** an animated circle that grows on the inhale and shrinks on the exhale.
-   - Spring/expressive motion, with a soft morphing shape (M3 Expressive shapes).
-   - Labels: "Breathe in" / "Breathe out".
-   - Breath level (per app, see §4): **Gentle** = 1 × 5 s (default), **Deeper** = 2 × 5 s,
-     **Extreme** = 3 × 5 s. Each breath is 2.5 s in, 2.5 s out.
-   - Optional haptics: a rising waveform during the inhale and a single soft tick at the
-     turn.
-   - The choice buttons stay hidden until the breathing finishes. Back goes home and
-     counts as "Not now".
+2. **Reflection card:** a large card with one short line that asks the user to think,
+   e.g. "What were you hoping to find in Instagram?".
+   - Lines are original to this project (`data/Reflections.kt`), picked at random and
+     never the same twice in a row. Some include the app's name.
+   - Pause length (per app, see §4): **Short** = 5 s (default), **Medium** = 10 s,
+     **Long** = 15 s. A progress bar on the card shows the wait.
+   - Optional haptics: one soft tick when the wait ends.
+   - The choice buttons stay hidden until the wait ends. Back goes home and counts as
+     "Not now".
 3. **Intention prompt** (optional): "What do you want to do on Instagram?" One-line text
    field with Skip. The text is stored locally with the event.
 4. **Choice:**
@@ -117,13 +117,13 @@ Days use the device's local time zone and start at midnight.
 
 ## 4. Settings (DataStore)
 **Global defaults** (used by any app without its own override):
-- Breath level: Gentle (1×5 s, default) / Deeper (2×5 s) / Extreme (3×5 s).
+- Pause length: Short (5 s, default) / Medium (10 s) / Long (15 s).
 - Grace period: 30 s / 1 / 3 / 5 / 10 min (default 3 min).
 - Haptics: on or off (default on).
 - Intention prompt: on or off (default off).
 
 **Per-app** (tap a guarded app):
-- Breath level: "Use default" or a specific level.
+- Pause length: "Use default" or a specific length.
 - Grace period: "Use default" or a specific value.
 - Remove from guarded list.
 
@@ -133,25 +133,25 @@ Days use the device's local time zone and start at midnight.
   system settings.
 - About: version, "free & offline", and the privacy statement.
 
-Per-app overrides are stored in Room (`app_config(packageName, breathLevel?, graceSeconds?)`,
+Per-app overrides are stored in Room (`app_config(packageName, pauseLength?, graceSeconds?)`,
 null = use default); global settings are in DataStore.
 
 ---
 
 ## 5. Onboarding
-1. **Welcome:** what Anasa does, in one sentence and one animation.
+1. **Welcome:** what Techdox does, in one sentence and one animation.
 2. **Pick apps:** suggestions are pre-ticked if installed (Instagram, TikTok, YouTube,
    X, Facebook, Reddit, Snapchat).
-3. **Accessibility:** a plain explanation of why it's needed and what we can and can't
-   see.
-   - We only see which app is in the foreground. We do not read screen content, and
-     nothing leaves the phone.
-   - "Open settings" opens `ACTION_ACCESSIBILITY_SETTINGS`.
-   - The screen detects the return and checks whether the service is now enabled.
-   - On Android 13+ the disclosure covers the "restricted setting" step for sideloaded
-     apps: App info → ⋮ → *Allow restricted settings*.
-4. **Done:** includes an optional tip about battery optimization and OEM "background
-   pop-up" permissions.
+3. **Phone setup:** what the app can and can't see, then a checklist. Each step has a
+   button that opens the right system page, and a tick when the app can detect it's done.
+   - Turn on the accessibility service (opens Accessibility settings, highlighting our entry
+     where the phone supports it). Detected.
+   - Android 13+: "Allow restricted settings" for sideloaded installs (opens App info).
+   - Battery: unrestricted / not optimised. Detected.
+   - Xiaomi only: "Display pop-up windows while running in the background" and Autostart.
+   - Every button falls back to App info if the phone doesn't have that page.
+
+The same checklist is in Settings → Phone setup.
 
 The home screen shows a persistent banner whenever the service is disabled.
 
@@ -188,9 +188,10 @@ Nothing else.
 ---
 
 ## 8. Decisions (approved)
-- Per-app breath level and grace period: **yes**, with global defaults.
+- Per-app pause length and grace period: **yes**, with global defaults.
 - Streak = consecutive days with ≥1 "Not now".
-- Breath levels: Gentle 1×5 s (default), Deeper 2×5 s, Extreme 3×5 s.
+- The pause is a reflection card (Short 5 s default, Medium 10 s, Long 15 s). It replaced
+  the earlier breathing animation.
 - Pause screen is launched as an Activity only; no overlay fallback in v1.
 - Entirely free. No paid tier, paywall or "Pro" features in v1. Any paid version is a
   later decision.
