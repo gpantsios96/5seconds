@@ -2,6 +2,7 @@ package app.techdox.service
 
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import app.techdox.data.AppConfigDao
 import app.techdox.data.PauseLength
 import app.techdox.data.Reflections
@@ -32,6 +33,8 @@ data class PauseSession(
     val intentionPrompt: Boolean,
     /** The line shown on the card, chosen once when the pause starts. */
     val card: Reflections.Card,
+    /** When the pause started, from `SystemClock.elapsedRealtime()`. The countdown is based on this. */
+    val startedAtElapsed: Long,
 )
 
 /**
@@ -107,6 +110,7 @@ class PauseCoordinator(
                     haptics = s.haptics,
                     intentionPrompt = s.intentionPrompt,
                     card = Reflections.choose(s.reasons, s.mixBuiltIn),
+                    startedAtElapsed = SystemClock.elapsedRealtime(),
                 )
                 launchPause(context)
             }

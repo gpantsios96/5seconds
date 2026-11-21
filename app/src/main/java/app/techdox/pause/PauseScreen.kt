@@ -2,13 +2,13 @@ package app.techdox.pause
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
+import android.os.SystemClock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,7 +40,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -78,21 +80,27 @@ fun PauseScreen(
         events.attemptsSince(session.packageName, Stats.startOfDay(LocalDate.now()))
     }.collectAsState(initial = null)
 
-    // Saved so a rotation doesn't restart the wait.
-    var ready by rememberSaveable { mutableStateOf(false) }
     var intention by rememberSaveable { mutableStateOf("") }
 
+    // The countdown is derived from the session's start time, so recreating this screen
+    // (rotation, fold/unfold, resize) neither restarts nor skips it.
+    val durationMillis = session.pauseLength.seconds * 1000L
+    fun now() = SystemClock.elapsedRealtime()
+    var progress by remember { mutableFloatStateOf(PauseTimer.progress(session.startedAtElapsed, now(), durationMillis)) }
+    val ready = progress >= 1f
+
     val haptics = remember { Haptics(context) }
-    val wait = remember { Animatable(if (ready) 1f else 0f) }
     val cardIn = remember { Animatable(if (ready) 1f else 0.85f) }
 
     LaunchedEffect(Unit) {
         cardIn.animateTo(1f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow))
     }
-    LaunchedEffect(Unit) {
-        if (ready) return@LaunchedEffect
-        wait.animateTo(1f, tween(session.pauseLength.seconds * 1000, easing = LinearEasing))
-        ready = true
+    LaunchedEffect(session.id) {
+        if (progress >= 1f) return@LaunchedEffect
+        while (progress < 1f) {
+            withFrameMillis { progress = PauseTimer.progress(session.startedAtElapsed, now(), durationMillis) }
+        }
+        // Only reached when the wait ended while this screen was showing, so it ticks once.
         if (session.haptics) haptics.tick()
     }
 
@@ -160,7 +168,7 @@ fun PauseScreen(
                         )
                         Spacer(Modifier.height(28.dp))
                         LinearProgressIndicator(
-                            progress = { wait.value },
+                            progress = { progress },
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.primary,
                             trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
