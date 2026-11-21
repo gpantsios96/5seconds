@@ -1,5 +1,8 @@
 package app.techdox.ui.screens
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.BoxWithConstraints
+import app.techdox.ui.centeredContent
 import app.techdox.APP_NAME
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
@@ -104,7 +107,7 @@ fun OnboardingScreen() {
 
 @Composable
 private fun Header(title: String, body: String) {
-    Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+    Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp).centeredContent()) {
         Text(title, style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
         Text(body, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -114,7 +117,7 @@ private fun Header(title: String, body: String) {
 @Composable
 private fun NavRow(onBack: (() -> Unit)?, onNext: () -> Unit, nextLabel: String = "Next", nextEnabled: Boolean = true) {
     Row(
-        Modifier.fillMaxWidth().padding(16.dp),
+        Modifier.padding(16.dp).centeredContent(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -130,33 +133,48 @@ private fun WelcomePage(onNext: () -> Unit) {
     val pulse by rememberInfiniteTransition(label = "demo").animateFloat(
         0f, 1f, infiniteRepeatable(tween(2500), RepeatMode.Reverse), label = "demo",
     )
-    Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.weight(1f))
-        PulseShape(
-            progress = pulse,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            haloColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth(0.7f).aspectRatio(1f),
-        )
-        Spacer(Modifier.height(32.dp))
-        Text("$APP_NAME", style = MaterialTheme.typography.displayMedium)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "A moment to think before the apps you open on autopilot. Then you decide.",
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Free. Offline. No account. Nothing leaves your phone.",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(Modifier.weight(1f))
-        Button(onClick = onNext, shape = RoundedCornerShape(32.dp), modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
-            Text("Get started", style = MaterialTheme.typography.titleMedium)
+    // Scrolls when the window is too short (landscape, split-screen); the shape is sized from
+    // the smaller side of the window so it never pushes the rest off-screen.
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val pulseSize = minOf(maxWidth * 0.7f, maxHeight * 0.4f, 360.dp)
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
+                .padding(24.dp)
+                .centeredContent(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Spacer(Modifier.height(0.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                PulseShape(
+                    progress = pulse,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    haloColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(pulseSize),
+                )
+                Spacer(Modifier.height(32.dp))
+                Text("$APP_NAME", style = MaterialTheme.typography.displayMedium)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "A moment to think before the apps you open on autopilot. Then you decide.",
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Free. Offline. No account. Nothing leaves your phone.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(24.dp))
+            }
+            Button(onClick = onNext, shape = RoundedCornerShape(32.dp), modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
+                Text("Get started", style = MaterialTheme.typography.titleMedium)
+            }
         }
     }
 }
@@ -167,7 +185,7 @@ private fun ReasonsPage(onBack: () -> Unit, onNext: () -> Unit) {
     // Load once; the editor saves every change itself.
     val saved by produceState<List<String>?>(null) { value = settings.settings.first().reasons }
     Column(Modifier.fillMaxSize()) {
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).centeredContent()) {
             Header(
                 "Why are you doing this?",
                 "Write it in your own words. $APP_NAME will show you these lines when you reach for a guarded app. You can change them any time.",
@@ -183,7 +201,7 @@ private fun ReasonsPage(onBack: () -> Unit, onNext: () -> Unit) {
 private fun SetupPage(onBack: () -> Unit, onFinish: () -> Unit) {
     val enabled = rememberAccessibilityEnabled()
     Column(Modifier.fillMaxSize()) {
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).centeredContent()) {
             Header(
                 "Set up your phone",
                 "$APP_NAME needs Accessibility access to notice when you open a guarded app. Each button below opens the right settings page; come back here afterwards.",

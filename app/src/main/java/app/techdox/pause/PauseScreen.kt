@@ -1,5 +1,7 @@
 package app.techdox.pause
 
+import app.techdox.ui.isWindowHeightCompact
+import app.techdox.ui.centeredContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -22,7 +24,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -106,17 +107,24 @@ fun PauseScreen(
 
     val trimmed = intention.trim().takeIf { it.isNotEmpty() }
 
+    // Short windows (landscape phone, split-screen, desktop window): the whole screen scrolls and
+    // the icon is dropped, so the card and both buttons always fit.
+    val compactHeight = isWindowHeightCompact()
+
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(
             Modifier
                 .fillMaxSize()
+                .then(if (compactHeight) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .safeDrawingPadding()
                 .imePadding()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                // The buttons share the card's width instead of stretching across wide windows.
+                .centeredContent(PauseContentMaxWidth),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(24.dp))
-            if (icon != null) {
+            Spacer(Modifier.height(if (compactHeight) 0.dp else 24.dp))
+            if (icon != null && !compactHeight) {
                 Image(icon, contentDescription = null, modifier = Modifier.size(56.dp))
                 Spacer(Modifier.height(12.dp))
             }
@@ -128,15 +136,18 @@ fun PauseScreen(
             )
 
             Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                if (compactHeight) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                },
                 contentAlignment = Alignment.Center,
             ) {
                 Card(
                     modifier = Modifier
-                        .widthIn(max = 480.dp)
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
                         .graphicsLayer {
@@ -223,6 +234,9 @@ fun PauseScreen(
         }
     }
 }
+
+/** Same width the card had on its own before; phones narrower than this are unaffected. */
+private val PauseContentMaxWidth = 480.dp
 
 private fun attemptsLine(label: String, count: Int?): String = when {
     count == null -> " "
