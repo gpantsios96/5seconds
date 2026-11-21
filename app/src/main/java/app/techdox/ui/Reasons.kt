@@ -17,7 +17,9 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
@@ -28,6 +30,11 @@ import androidx.compose.ui.unit.dp
 import app.techdox.container
 import app.techdox.data.Reflections
 import kotlinx.coroutines.launch
+
+private val fieldsSaver = listSaver<SnapshotStateList<String>, String>(
+    save = { it.toList() },
+    restore = { it.toMutableStateList() },
+)
 
 /** Starting points the user can tap instead of typing. */
 private val SUGGESTIONS = listOf(
@@ -50,7 +57,8 @@ fun ReasonsEditor(initial: List<String>, modifier: Modifier = Modifier) {
     val settings = LocalContext.current.container.settings
     val scope = rememberCoroutineScope()
     // Always start with one field so there is somewhere to type.
-    val fields = remember { initial.ifEmpty { listOf("") }.toMutableStateList() }
+    // Saveable, so empty "Add another" fields and half-typed text survive rotation and resizing.
+    val fields = rememberSaveable(saver = fieldsSaver) { initial.ifEmpty { listOf("") }.toMutableStateList() }
     fun save() { scope.launch { settings.setReasons(fields.toList()) } }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
