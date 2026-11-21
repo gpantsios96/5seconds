@@ -1,5 +1,9 @@
 package app.techdox.ui.screens
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.BoxWithConstraints
+import app.techdox.ui.centeringInset
+import app.techdox.ui.centeredContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,7 +67,9 @@ fun AppPickerList(modifier: Modifier = Modifier) {
     val guardedSet = guarded.map { it.packageName }.toSet()
     var query by rememberSaveable { mutableStateOf("") }
 
-    Column(modifier) {
+    BoxWithConstraints(modifier) {
+    val inset = centeringInset(maxWidth)
+    Column {
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
@@ -71,8 +77,8 @@ fun AppPickerList(modifier: Modifier = Modifier) {
             singleLine = true,
             shape = RoundedCornerShape(28.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .centeredContent(),
         )
         val list = apps
         if (list == null) {
@@ -82,7 +88,7 @@ fun AppPickerList(modifier: Modifier = Modifier) {
         val shown = list.filter { query.isBlank() || it.label.contains(query.trim(), ignoreCase = true) }
             // Guarded first, then alphabetical.
             .sortedWith(compareByDescending<InstalledApp> { it.packageName in guardedSet }.thenBy { it.label.lowercase() })
-        LazyColumn(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = inset)) {
             items(shown, key = { it.packageName }) { app ->
                 val checked = app.packageName in guardedSet
                 val toggle = {
@@ -108,6 +114,7 @@ fun AppPickerList(modifier: Modifier = Modifier) {
         }
     }
 }
+}
 
 @Composable
 fun AppPickerScreen(onDone: () -> Unit) {
@@ -116,10 +123,10 @@ fun AppPickerScreen(onDone: () -> Unit) {
             Text(
                 "Choose apps to pause",
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp),
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp).centeredContent(),
             )
             AppPickerList(Modifier.weight(1f))
-            Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.End) {
+            Row(Modifier.padding(16.dp).centeredContent(), horizontalArrangement = Arrangement.End) {
                 Button(onClick = onDone) { Text("Done") }
             }
         }

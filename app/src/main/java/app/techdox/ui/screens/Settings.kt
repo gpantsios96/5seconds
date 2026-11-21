@@ -1,5 +1,6 @@
 package app.techdox.ui.screens
 
+import app.techdox.ui.centeredContent
 import app.techdox.APP_NAME
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,7 +54,7 @@ fun SettingsScreen(settings: Settings) {
     var confirmReset by rememberSaveable { mutableStateOf(false) }
 
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).centeredContent(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(8.dp))

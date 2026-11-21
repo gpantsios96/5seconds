@@ -1,5 +1,6 @@
 package app.techdox.ui.screens
 
+import app.techdox.ui.centeredContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +75,8 @@ fun StatsScreen() {
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(16.dp)
+            .centeredContent(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Last 7 days", style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(8.dp))

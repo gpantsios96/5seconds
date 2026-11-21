@@ -1,5 +1,6 @@
 package app.techdox.ui.screens
 
+import app.techdox.ui.CenteredLazyColumn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -67,9 +68,8 @@ fun AppsScreen(settings: Settings, onAddApps: () -> Unit) {
             )
         },
     ) { padding ->
-        LazyColumn(
+        CenteredLazyColumn(
             Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item { Text("Guarded apps", style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(8.dp)) }

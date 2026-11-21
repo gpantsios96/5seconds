@@ -1,5 +1,6 @@
 package app.techdox.ui.screens
 
+import app.techdox.ui.CenteredLazyColumn
 import app.techdox.APP_NAME
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -63,9 +64,8 @@ fun HomeScreen(onPickApps: () -> Unit) {
         )
     }.sortedByDescending { it.opened + it.avoided + it.graceOpens }
 
-    LazyColumn(
+    CenteredLazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
