@@ -9,6 +9,8 @@ lifecycle = "2.11.0"
 room = "2.8.5"
 datastore = "1.3.0"
 graphicsShapes = "1.1.0"
+# Window size classes via currentWindowAdaptiveInfo().
+material3Adaptive = "1.3.0"
 junit = "4.13.2"
 # Material 3 Expressive APIs (MaterialExpressiveTheme, MotionScheme) are public from 1.5.0.
 material3 = "1.5.0-rc01"
@@ -28,6 +30,7 @@ room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "material3Adaptive" }
 graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
 junit = { module = "junit:junit", version.ref = "junit" }
 
